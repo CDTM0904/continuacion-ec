@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main   # Se ejecutará cuando hagas push a main
+      - main
 
 jobs:
   build-and-deploy:
@@ -27,11 +27,13 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hola-mundo-flask:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/hola-mundo-flask:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/hola-mundo-flask:buildcache,mode=max
 
       - name: Deploy to Render
         run: |
           curl -X POST \
             -H "Accept: application/json" \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -d '{"serviceId": "${{ secrets.RENDER_SERVICE_ID }}"}' \
+            -d '{"serviceId":"${{ secrets.RENDER_SERVICE_ID }}"}' \
             https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys
